@@ -46,7 +46,7 @@ def publishPC2(srange):
     x = u * srange * 8
     y = v * srange * 8
     z = u + srange
-    points = np.array([z,y,x,x]).reshape(4,-1).T
+    points = np.array([z,y,x,u]).reshape(4,-1).T
 
     pc2 = point_cloud2.create_cloud(header, fields, points)
     return pc2
@@ -58,7 +58,7 @@ def callback(data):
 
 def listener():
     rospy.init_node('pc2_publisher')
-    pub = rospy.Publisher('dragonfly26/points2', PointCloud2, queue_size=100)
+    pub = rospy.Publisher('dragonfly26/tof/voxl_point_cloud', PointCloud2, queue_size=100)
     rate = rospy.Rate(10)
     rospy.Subscriber("sonar_topic", Range, callback)
     while not rospy.is_shutdown():
@@ -66,7 +66,7 @@ def listener():
             cloud_out = publishPC2(pc2_list[0]) 
             pc2_list.pop(0)
             pub.publish(cloud_out)
-        rate.sleep()
+        #rate.sleep()
 
 
 if __name__=='__main__':
