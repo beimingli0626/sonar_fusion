@@ -1,7 +1,4 @@
 <launch>
-  <param name="use_sim_time" value="true" />
-  <node name="RVIZ" pkg="rviz" type="rviz" args=" -d $(find sonar_vis)/param/ddk_sonar.rviz" />
-
   <arg name="mav_name" default="dragonfly26"/>
   <arg name="cam_name" default="tof"/>
   <arg name="map_frame_id" default="$(arg mav_name)/odom"/>
@@ -35,10 +32,4 @@
       <remap from="cloud_in" to="$(arg points_topic)" />
     </node>
   </group>
-
-  <arg name="sonar_frame_id" default="sonar"/>
-  <node pkg="tf2_ros" type="static_transform_publisher" name="sonar_static_publisher" args="0.05 0.0 0.05 0 0 0 $(arg base_frame_id) $(arg sonar_frame_id)" />
-  <node pkg="sonar_vis" type="maxsonar_listener.py" name="pc2_gen" output="screen">
-    <param name="sensor_range" value="$(arg sensor_range)" />
-  </node>
 </launch>
