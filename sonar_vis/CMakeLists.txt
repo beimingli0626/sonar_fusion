@@ -17,6 +17,8 @@ find_package(catkin REQUIRED COMPONENTS
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
 
+find_package(PCL 1.2 REQUIRED)
+
 
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
@@ -110,6 +112,7 @@ catkin_package(
 #  DEPENDS system_lib
 )
 
+
 ###########
 ## Build ##
 ###########
@@ -120,6 +123,8 @@ include_directories(
   include
   ${catkin_INCLUDE_DIRS}
 )
+
+include_directories(${PCL_INCLUDE_DIRS})
 
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
@@ -150,6 +155,9 @@ include_directories(
 # target_link_libraries(${PROJECT_NAME}_node
 #   ${catkin_LIBRARIES}
 # )
+
+link_directories(${PCL_LIBRARY_DIRS})
+add_definitions(${PCL_DEFINITIONS})
 
 #############
 ## Install ##
@@ -202,6 +210,11 @@ include_directories(
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()
+
+set(${PROJECT_NAME}_SOURCES
+    src/filter_try.cpp)
+add_executable (sonar_vis src/filter_try.cpp)
+target_link_libraries (sonar_vis ${PCL_LIBRARIES})
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
