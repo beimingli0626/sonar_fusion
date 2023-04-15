@@ -211,10 +211,10 @@ add_definitions(${PCL_DEFINITIONS})
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()
 
-set(${PROJECT_NAME}_SOURCES
-    src/filter_try.cpp)
-add_executable (sonar_vis src/filter_try.cpp)
-target_link_libraries (sonar_vis ${PCL_LIBRARIES})
+# set(${PROJECT_NAME}_SOURCES
+#    src/filter_try.cpp)
+# add_executable (sonar_vis src/filter_try.cpp)
+# target_link_libraries (sonar_vis ${PCL_LIBRARIES})
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)

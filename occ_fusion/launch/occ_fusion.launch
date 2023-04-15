@@ -1,0 +1,92 @@
+<?xml version="1.0"?>
+<launch>
+  <arg name="world_frame_id" default="world"/>
+  <arg name="mav_name" default="ddk"/>
+
+  <arg name="robot_frame" default="$(arg mav_name)/base_link"/>
+  <arg name="odom_world" default="$(arg mav_name)/ground_truth/odom"/>
+  <arg name="depth_topic" default="$(arg mav_name)/rgbd/depth/image_raw"/>
+  <arg name="sonar_topic" default="$(arg mav_name)/sonar"/>
+
+  <arg name="map_size_x" default="30"/>
+  <arg name="map_size_y" default="30"/>
+  <arg name="map_size_z" default="5.0"/>
+
+  <arg name="cx" value="376.5"/>
+  <arg name="cy" value="240.5"/>
+  <arg name="fx" value="315.50122168521807"/>
+  <arg name="fy" value="315.50122168521807"/>
+
+  <!-- <arg name="odometry_topic" default="/$(arg mav_name)/odom"/> -->
+
+  <node pkg="occ_fusion" name="occ_fusion_node" type="occ_fusion_node" output="screen" >
+    <!--mapping paras global map-->
+    <remap from="/depth_topic" to="$(arg depth_topic)" />
+    <remap from="/sonar_topic" to="$(arg sonar_topic)" />
+    <remap from="/odom_world" to="$(arg odom_world)" />
+
+    <param name="occ_map/map_size_x"   value="$(arg map_size_x)" /> 
+    <param name="occ_map/map_size_y"   value="$(arg map_size_y)" /> 
+    <param name="occ_map/map_size_z"   value="$(arg map_size_z)" /> 
+    <param name="occ_map/origin_x"   value="-15" /> 
+    <param name="occ_map/origin_y"   value="-15" /> 
+    <param name="occ_map/origin_z"   value="0.0" /> 
+
+    <param name="occ_map/resolution"      value="0.05" /> 
+    <param name="occ_map/local_radius_x"  value="5" /> 
+    <param name="occ_map/local_radius_y"  value="5" /> 
+    <param name="occ_map/local_radius_z"  value="3.0" /> 
+    <param name="occ_map/use_global_map"  value="false"/>
+    <param name="occ_map/from_dataset"   value="false"/>
+
+    <!-- depth camera -->
+    <param name="occ_map/cx" value="$(arg cx)"/>
+    <param name="occ_map/cy" value="$(arg cy)"/>
+    <param name="occ_map/fx" value="$(arg fx)"/>
+    <param name="occ_map/fy" value="$(arg fy)"/>
+    <param name="occ_map/rows" value="752"/>
+    <param name="occ_map/cols" value="480"/>
+
+    <!-- depth filter -->
+    <param name="occ_map/use_shift_filter" value="true"/>
+    <param name="occ_map/depth_filter_tolerance" value="0.15"/>
+    <param name="occ_map/depth_filter_maxdist"   value="5.0"/>
+    <param name="occ_map/depth_filter_mindist"   value="0.2"/>
+    <param name="occ_map/depth_filter_margin"    value="0"/>
+    <param name="occ_map/depth_scale" value="1000.0"/>
+    <param name="occ_map/skip_pixel" value="1"/>
+    <param name="occ_map/show_filter_proj_depth" value="true"/>
+    <param name="occ_map/show_raw_depth" value="false"/>
+
+    <!-- occupancy update -->
+    <param name="occ_map/p_hit"  value="0.70"/>
+    <param name="occ_map/p_miss" value="0.35"/>
+    <param name="occ_map/p_min"  value="0.12"/>
+    <param name="occ_map/p_max"  value="0.97"/>
+    <param name="occ_map/p_occ"  value="0.80"/>
+    <param name="occ_map/min_ray_length" value="0.3"/>
+    <param name="occ_map/max_ray_length" value="5.0"/>
+
+    <!-- sonar map -->
+    <param name="sonar_occ_map/map_size_x"   value="$(arg map_size_x)" /> 
+    <param name="sonar_occ_map/map_size_y"   value="$(arg map_size_y)" /> 
+    <param name="sonar_occ_map/map_size_z"   value="$(arg map_size_z)" /> 
+    <param name="sonar_occ_map/origin_x"   value="-15" /> 
+    <param name="sonar_occ_map/origin_y"   value="-15" /> 
+    <param name="sonar_occ_map/origin_z"   value="0.0" /> 
+    <param name="sonar_occ_map/resolution"      value="0.05" /> 
+
+    <param name="sonar_occ_map/num_points"      value="300000" /> 
+    <param name="sonar_occ_map/show_sonar_depth"      value="true" /> 
+
+    <!-- soanr occupancy update -->
+    <param name="sonar_occ_map/p_hit"  value="0.70"/>
+    <param name="sonar_occ_map/p_miss" value="0.35"/>
+    <param name="sonar_occ_map/p_min"  value="0.12"/>
+    <param name="sonar_occ_map/p_max"  value="0.97"/>
+    <param name="sonar_occ_map/p_occ"  value="0.80"/>
+    <param name="sonar_occ_map/min_ray_length" value="0.2"/>
+    <param name="sonar_occ_map/max_ray_length" value="5.0"/>
+  </node>
+
+</launch>

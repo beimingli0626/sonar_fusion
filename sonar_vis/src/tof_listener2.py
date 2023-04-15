@@ -7,7 +7,7 @@ import numpy as np
 
 def callback(data):
     # Convert the point cloud message to a list of points
-    point_list = list(pc2.read_points(data))
+    point_list = list(pc2.read_points(data, field_names=['x', 'y', 'z', "noise", "confidence", "intensity"], skip_nans=True))
 
     widi = data.height
     hidi = data.width
@@ -24,8 +24,10 @@ def callback(data):
 
     resh = resh.flatten()
 
+    # intensity = []
     for ii in reversed(range(resh.shape[0])):
         if (resh[ii] == 1):
+            # intensity.append(point_list[ii][4] - ((point_list[ii][4] >> 6) << 6))
             del point_list[ii]
             #points_list = points_list[:ii]
 
