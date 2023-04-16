@@ -199,7 +199,7 @@ void SonarOccMap::sonarOdomCallback(const sensor_msgs::RangeConstPtr& sonar_msg,
   /* ---------- turn sonar message into pointcloud ---------- */
   proj_points_cnt_ = 0;
   sonarToPointCloud(sonar_msg->range, sonar_msg->field_of_view, T_wc, sonar_msg->header.stamp);
-  raycastProcess(t_wc);
+  raycastProcess(sonar_msg->range, sonar_msg->field_of_view, T_wc);
 
   local_map_valid_ = true;
   latest_odom_time_ = odom->header.stamp;
@@ -240,9 +240,9 @@ void SonarOccMap::sonarToPointCloud(const float range, const float field_of_view
 
       // create point using polar and azimuth angle
       Eigen::Vector3d proj_pt_NED, proj_pt_sonar;
-      proj_pt_sonar(0) = range * sin(theta) * cos(phi);
-      proj_pt_sonar(1) = range * sin(theta) * sin(phi);
-      proj_pt_sonar(2) = range * cos(theta);
+      proj_pt_sonar(0) = (range + epsilon_) * sin(theta) * cos(phi);
+      proj_pt_sonar(1) = (range + epsilon_) * sin(theta) * sin(phi);
+      proj_pt_sonar(2) = (range + epsilon_) * cos(theta);
       proj_pt_NED = T_wc.block<3,3>(0,0) * proj_pt_sonar + T_wc.block<3,1>(0,3);
       proj_points_[proj_points_cnt_++] = proj_pt_NED;
 
@@ -272,11 +272,13 @@ void SonarOccMap::sonarToPointCloud(const float range, const float field_of_view
   // // for Golden Spiral algo
 }
 
-void SonarOccMap::raycastProcess(const Eigen::Vector3d& t_wc)
+void SonarOccMap::raycastProcess(const float range, const float field_of_view, const Eigen::Matrix4d& T_wc)
 {
   if (proj_points_cnt_ == 0)
     return;
 
+  Eigen::Vector3d t_wc = T_wc.block<3,1>(0,3);
+  
   // raycast_num_ = (raycast_num_ + 1) % 100000;
   raycast_num_ += 1;
 
@@ -339,14 +341,21 @@ void SonarOccMap::raycastProcess(const Eigen::Vector3d& t_wc)
   }
 
   /* ---------- update occupancy in batch ---------- */
+  Eigen::Vector3i odom_idx, center_idx;
+  posToIndex(t_wc, odom_idx);
+  Eigen::Vector3d center_pos = T_wc.block<3,3>(0,0) * Eigen::Vector3d(0, 0, 1) + T_wc.block<3,1>(0,3);  // the point right in front of sonar
+  posToIndex(center_pos, center_idx);
+  // ROS_INFO_STREAM("odom idx: " << odom_idx(0) << " " << odom_idx(1) << " " << odom_idx(2));
+  // ROS_INFO_STREAM("center idx: " << center_idx(0) << " " << center_idx(1) << " " << center_idx(2));
   while (!cache_voxel_.empty())
   {
     Eigen::Vector3i idx = cache_voxel_.front();
     int idx_ctns = idx(0) * grid_size_y_multiply_z_ + idx(1) * grid_size_(2) + idx(2);
     cache_voxel_.pop();
 
-    double log_odds_update =
-        cache_hit_[idx_ctns] >= cache_all_[idx_ctns] - cache_hit_[idx_ctns] ? prob_hit_log_ : prob_miss_log_;
+    // get log odds update based on sonar sensor model
+    double log_odds_update = getSonarLogOddsUpdate(range, field_of_view, center_idx, odom_idx, idx);
+
     cache_hit_[idx_ctns] = cache_all_[idx_ctns] = 0;
 
     if (log_odds_update >= 0 && occupancy_buffer_[idx_ctns] >= clamp_max_log_) continue;
@@ -358,6 +367,34 @@ void SonarOccMap::raycastProcess(const Eigen::Vector3d& t_wc)
     occupancy_buffer_[idx_ctns] =
         std::min(std::max(occupancy_buffer_[idx_ctns] + log_odds_update, clamp_min_log_), clamp_max_log_);
   }
+}
+
+double SonarOccMap::getSonarLogOddsUpdate(const float range, const float field_of_view, const Eigen::Vector3i& center_idx, const Eigen::Vector3i& odom_idx, const Eigen::Vector3i& idx)
+{
+  // modified from: Development of advanced sonar sensor model using data reliability and map evaluation method for grid map building
+  Eigen::Vector3i center_ray = center_idx - odom_idx;
+  Eigen::Vector3f center_ray_float = center_ray.cast<float>();
+  float center_ray_norm = center_ray_float.norm();
+  Eigen::Vector3i ray = idx - odom_idx;
+  Eigen::Vector3f ray_float = ray.cast<float>();
+  float ray_norm = ray_float.norm();
+  
+  double length = ray_norm * resolution_; // length in meter
+  double angle = acos(center_ray.dot(ray) / ray_norm / center_ray_norm);
+  double angle_decay = max(1 - pow((2 * angle / field_of_view), 2), 0.0);  // the larger the angle, the larger the decay
+  double occ_prob;
+  if (length >= min_ray_length_ && length <= range - epsilon_) {
+    double decayed_p_miss_ = 0.5 - (0.5 - p_miss_) * angle_decay;
+    occ_prob = decayed_p_miss_ + min(pow((length / (range - epsilon_)), 2), 1.0) * (0.5 - decayed_p_miss_);
+  }
+  else if (length > range - epsilon_) {
+    double decayed_p_hit_ = 0.5 + (p_hit_ - 0.5) * angle_decay;
+    occ_prob = decayed_p_hit_ - min(pow(((length - range) / epsilon_), 2), 1.0) * (decayed_p_hit_ - 0.5);
+  }
+  // ROS_INFO_STREAM(" center_ray: " << center_ray << " ray: " << ray);
+  // ROS_INFO_STREAM(" ray norm: " << ray_norm << " cosine: " << center_ray.dot(ray) / ray_norm / center_ray_norm);
+  // ROS_INFO_STREAM(" angle: " << angle << " angle_decay: " << angle_decay << " update: " << logit(occ_prob));
+  return logit(occ_prob);
 }
 
 int SonarOccMap::setCacheOccupancy(const Eigen::Vector3d &pos, int occ)
@@ -415,6 +452,7 @@ void SonarOccMap::init(const ros::NodeHandle& nh)
   
   node_.param("sonar_occ_map/min_ray_length", min_ray_length_, -0.1);
   node_.param("sonar_occ_map/max_ray_length", max_ray_length_, -0.1);
+  node_.param("sonar_occ_map/epsilon", epsilon_, 0.05);
 
   node_.param("sonar_occ_map/p_hit", p_hit_, 0.70);
   node_.param("sonar_occ_map/p_miss", p_miss_, 0.35);

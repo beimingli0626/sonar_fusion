@@ -40,6 +40,7 @@ using std::cos;
 using std::sin;
 using std::sqrt;
 using std::acos;
+using std::pow;
 
 
 class SonarOccMap
@@ -111,6 +112,8 @@ private:
 	ros::Publisher hist_view_cloud_pub_; 
 	ros::Publisher pose_vis_pub_, twist_vis_pub_, acc_vis_pub_;
 
+  // for sonar
+  double epsilon_;
   typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::Range, nav_msgs::Odometry> SyncPolicySonarOdom;
 	typedef shared_ptr<message_filters::Synchronizer<SyncPolicySonarOdom>> SynchronizerSonarOdom;
   SynchronizerSonarOdom sync_sonar_odom_;
@@ -120,7 +123,8 @@ private:
                          const nav_msgs::OdometryConstPtr& odom, 
                          const Eigen::Matrix4d& T_ic);
   void sonarToPointCloud(const float range, const float field_of_view, const Eigen::Matrix4d& T_wc, ros::Time r_s);
-  void raycastProcess(const Eigen::Vector3d& t_wc);
+  void raycastProcess(const float range, const float field_of_view, const Eigen::Matrix4d& T_wc);
+  double getSonarLogOddsUpdate(const float range, const float field_of_view, const Eigen::Vector3i& center_idx, const Eigen::Vector3i& odom_idx, const Eigen::Vector3i& idx);
   int setCacheOccupancy(const Eigen::Vector3d &pos, int occ);
 
   void globalOccVisCallback(const ros::TimerEvent& e);
