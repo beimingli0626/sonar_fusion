@@ -61,6 +61,7 @@ public:
   void resetAllBuffer();
   Eigen::Vector3i getBufferSize();
   void getOccupancy(std::vector<double> &occupancy_buffer);
+  void getOccupancyBinary(std::vector<std::int8_t> &occupancy_buffer);
   void setOccupancy(const Eigen::Vector3d &pos);
   int getVoxelState(const Eigen::Vector3d &pos);
   int getVoxelState(const Eigen::Vector3i &id);

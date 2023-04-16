@@ -14,6 +14,11 @@ class OccFusion {
   private:
     OccMap::Ptr occ_map_;
     SonarOccMap::Ptr sonar_occ_map_;
+
+    ros::Timer cam_occ_update_timer_;
+    ros::NodeHandle node_;
+
+    void camOccMapUpdateCallback(const ros::TimerEvent& e);
 };
 
 

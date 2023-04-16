@@ -63,6 +63,14 @@ Eigen::Vector3i OccMap::getBufferSize() {
   return grid_size_;
 }
 
+void OccMap::getOccupancyBinary(std::vector<std::int8_t> &occupancy_buffer) {
+  int size = occupancy_buffer_.size();
+  occupancy_buffer.reserve(size);
+  for (int i = 0; i < size; i++) {
+    occupancy_buffer.push_back(std::int8_t(occupancy_buffer_[i] > min_occupancy_log_));
+  }
+}
+
 void OccMap::getOccupancy(std::vector<double> &occupancy_buffer) {
   occupancy_buffer = occupancy_buffer_;
 }

@@ -66,6 +66,10 @@ void SonarOccMap::getOccupancy(std::vector<double> &occupancy_buffer) {
   occupancy_buffer = occupancy_buffer_;
 }
 
+void SonarOccMap::updateCamOccupancy(std::vector<int8_t> &occupancy_buffer) {
+  cam_occupancy_buffer_ = occupancy_buffer;
+}
+
 inline bool SonarOccMap::isInLocalMap(const Eigen::Vector3d &pos)
 {
   Eigen::Vector3i idx;
@@ -178,6 +182,9 @@ void SonarOccMap::sonarOdomCallback(const sensor_msgs::RangeConstPtr& sonar_msg,
                               const nav_msgs::OdometryConstPtr& odom, 
                               const Eigen::Matrix4d& T_ic)
 {
+  /* drop the first few sonar read until the camera has build an init map */
+  if (sonar_odom_count_++ < 5) return;  // delay the init of sonar occ map by roughly one second
+
   /* ---------- get pose ---------- */
   // w, x, y, z -> q0, q1, q2, q3
   Eigen::Matrix3d R_wi = Eigen::Quaterniond(odom->pose.pose.orientation.w, 
@@ -286,6 +293,7 @@ void SonarOccMap::raycastProcess(const float range, const float field_of_view, c
 
   /* ---------- iterate projected points ---------- */
   int set_cache_idx;
+  int num_occupied_in_cam= 0; // number of occupied points in camera-based occupancy grid
   for (int i = 0; i < proj_points_cnt_; ++i)
   {
     /* ---------- occupancy of ray end ---------- */
@@ -322,14 +330,24 @@ void SonarOccMap::raycastProcess(const float range, const float field_of_view, c
       continue;
     Eigen::Vector3d half = Eigen::Vector3d(0.5, 0.5, 0.5);
     Eigen::Vector3d ray_pt;
-    if (!raycaster.step(ray_pt)) // skip the ray start point since it's the projected point.
+    
+    // skip the ray start point since it's the projected point.
+    if (!raycaster.step(ray_pt))
       continue;
+    Eigen::Vector3d tmp = (ray_pt + half) * resolution_;
+    Eigen::Vector3i id;
+    posToIndex(tmp, id);
+    set_cache_idx = id(0) * grid_size_y_multiply_z_ + id(1) * grid_size_(2) + id(2);
+    if (cam_occupancy_buffer_[set_cache_idx] == 1) num_occupied_in_cam += 1;
+
+    // keep backtracing the rest of the ray
     while (raycaster.step(ray_pt))
     {
       Eigen::Vector3d tmp = (ray_pt + half) * resolution_;
       set_cache_idx = setCacheOccupancy(tmp, 0);
       if (set_cache_idx != INVALID_IDX)
       {
+        if (cam_occupancy_buffer_[set_cache_idx] == 1) num_occupied_in_cam += 1;
         //skip overlap grids in each ray
         //NOTE: what if three occupied detection are on the same line?
         if (cache_traverse_[set_cache_idx] == raycast_num_)
@@ -340,13 +358,21 @@ void SonarOccMap::raycastProcess(const float range, const float field_of_view, c
     }
   }
 
+  // if camera already detect the obstacles in the range, drop the sonar read and don't update the sonar occupancy grid
+  ROS_INFO_STREAM("num occupied cells in camera occ map: " << num_occupied_in_cam);
+  if (num_occupied_in_cam > 4) {  // if more than 4 cells are detected as occupied in camera, drop this sonar reading
+    fill(cache_all_.begin(), cache_all_.end(), 0);
+    fill(cache_hit_.begin(), cache_hit_.end(), 0);
+    queue<Eigen::Vector3i> empty;
+    swap(cache_voxel_, empty);
+    return;
+  }
+
   /* ---------- update occupancy in batch ---------- */
   Eigen::Vector3i odom_idx, center_idx;
   posToIndex(t_wc, odom_idx);
   Eigen::Vector3d center_pos = T_wc.block<3,3>(0,0) * Eigen::Vector3d(0, 0, 1) + T_wc.block<3,1>(0,3);  // the point right in front of sonar
   posToIndex(center_pos, center_idx);
-  // ROS_INFO_STREAM("odom idx: " << odom_idx(0) << " " << odom_idx(1) << " " << odom_idx(2));
-  // ROS_INFO_STREAM("center idx: " << center_idx(0) << " " << center_idx(1) << " " << center_idx(2));
   while (!cache_voxel_.empty())
   {
     Eigen::Vector3i idx = cache_voxel_.front();
@@ -520,6 +546,7 @@ void SonarOccMap::init(const ros::NodeHandle& nh)
   cache_rayend_.resize(buffer_size);
   cache_traverse_.resize(buffer_size);
   raycast_num_ = 0;
+  sonar_odom_count_ = 0;
   
   proj_points_cnt_ = 0;
   unknown_flag_ = 0.01;

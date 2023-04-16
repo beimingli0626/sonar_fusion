@@ -81,7 +81,7 @@
 
     <!-- soanr occupancy update -->
     <param name="sonar_occ_map/p_hit"  value="0.70"/>
-    <param name="sonar_occ_map/p_miss" value="0.35"/>
+    <param name="sonar_occ_map/p_miss" value="0.30"/>
     <param name="sonar_occ_map/p_min"  value="0.12"/>
     <param name="sonar_occ_map/p_max"  value="0.97"/>
     <param name="sonar_occ_map/p_occ"  value="0.80"/>

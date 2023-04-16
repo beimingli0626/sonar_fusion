@@ -41,6 +41,7 @@ using std::sin;
 using std::sqrt;
 using std::acos;
 using std::pow;
+using std::swap;
 
 
 class SonarOccMap
@@ -67,6 +68,7 @@ public:
   void resetAllBuffer();
   Eigen::Vector3i getBufferSize();
   void getOccupancy(std::vector<double> &occupancy_buffer);
+  void updateCamOccupancy(std::vector<std::int8_t> &occupancy_buffer);
   void setOccupancy(const Eigen::Vector3d &pos);
   int getVoxelState(const Eigen::Vector3d &pos);
   int getVoxelState(const Eigen::Vector3i &id);
@@ -83,6 +85,7 @@ public:
   
 private:
   std::vector<double> occupancy_buffer_;  // 0 is free, 1 is occupied
+  std::vector<int8_t> cam_occupancy_buffer_;  // 0 is free, 1 is occupied
 
   // map property
   Eigen::Vector3d min_range_, max_range_;  // map range in pos
@@ -114,6 +117,7 @@ private:
 
   // for sonar
   double epsilon_;
+  int sonar_odom_count_;
   typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::Range, nav_msgs::Odometry> SyncPolicySonarOdom;
 	typedef shared_ptr<message_filters::Synchronizer<SyncPolicySonarOdom>> SynchronizerSonarOdom;
   SynchronizerSonarOdom sync_sonar_odom_;
