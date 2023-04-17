@@ -15,6 +15,7 @@
 #include <message_filters/time_synchronizer.h>
 #include <message_filters/sync_policies/exact_time.h>
 #include <message_filters/sync_policies/approximate_time.h>
+#include <occ_fusion_msgs/DetectWindow.h>
 // #include <tf2_ros/transform_listener.h>
 
 #include <queue>
@@ -68,7 +69,6 @@ public:
   void resetAllBuffer();
   Eigen::Vector3i getBufferSize();
   void getOccupancy(std::vector<double> &occupancy_buffer);
-  void updateCamOccupancy(std::vector<std::int8_t> &occupancy_buffer);
   void setOccupancy(const Eigen::Vector3d &pos);
   int getVoxelState(const Eigen::Vector3d &pos);
   int getVoxelState(const Eigen::Vector3i &id);
@@ -82,6 +82,10 @@ public:
 
   double getMapDefault();
   typedef shared_ptr<SonarOccMap> Ptr;
+
+  // sonar
+  Eigen::Vector3i getSonarCenterIndex() {return sonar_center_idx_;}
+  void updateCamOccupancy(std::vector<std::int8_t> &occupancy_buffer);
   
 private:
   std::vector<double> occupancy_buffer_;  // 0 is free, 1 is occupied
@@ -118,6 +122,7 @@ private:
   // for sonar
   double epsilon_;
   int sonar_odom_count_;
+  Eigen::Vector3i sonar_center_idx_;
   typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::Range, nav_msgs::Odometry> SyncPolicySonarOdom;
 	typedef shared_ptr<message_filters::Synchronizer<SyncPolicySonarOdom>> SynchronizerSonarOdom;
   SynchronizerSonarOdom sync_sonar_odom_;
@@ -135,6 +140,8 @@ private:
 
   bool has_global_cloud_, has_first_depth_;
 	bool global_map_valid_, local_map_valid_;
+  // ros::ServiceClient detect_window_client_;
+  // bool callDetectWindow(const Eigen::Vector3i& center_idx);
 
   // map fusion 
   vector<Eigen::Vector3d> proj_points_;

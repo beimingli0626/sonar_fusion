@@ -11,6 +11,7 @@ find_package(catkin REQUIRED COMPONENTS
   cv_bridge
   tf2_ros
   tf2
+  occ_fusion_msgs
 )
 
 find_package(OpenCV REQUIRED)
@@ -20,7 +21,10 @@ find_package(PCL 1.7 REQUIRED)
 catkin_package(
  INCLUDE_DIRS include
  LIBRARIES ${PROJECT_NAME}
- CATKIN_DEPENDS roscpp std_msgs 
+ CATKIN_DEPENDS 
+    roscpp 
+    std_msgs 
+    occ_fusion_msgs
 #  DEPENDS system_lib
 )
 

@@ -20,6 +20,7 @@ find_package(catkin REQUIRED COMPONENTS
   cv_bridge
   occ_grid
   sonar_occ_grid
+  occ_fusion_msgs
   message_generation
 )
 
@@ -34,6 +35,7 @@ catkin_package(
   cv_bridge
   occ_grid
   sonar_occ_grid
+  occ_fusion_msgs
   message_runtime
 )
 

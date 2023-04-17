@@ -65,6 +65,7 @@ Eigen::Vector3i OccMap::getBufferSize() {
 
 void OccMap::getOccupancyBinary(std::vector<std::int8_t> &occupancy_buffer) {
   int size = occupancy_buffer_.size();
+  occupancy_buffer.clear();
   occupancy_buffer.reserve(size);
   for (int i = 0; i < size; i++) {
     occupancy_buffer.push_back(std::int8_t(occupancy_buffer_[i] > min_occupancy_log_));

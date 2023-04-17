@@ -289,7 +289,7 @@ void SonarOccMap::raycastProcess(const float range, const float field_of_view, c
   // raycast_num_ = (raycast_num_ + 1) % 100000;
   raycast_num_ += 1;
 
-  ROS_INFO_STREAM("proj_points_ size: " << proj_points_cnt_);
+  // ROS_INFO_STREAM("proj_points_ size: " << proj_points_cnt_);
 
   /* ---------- iterate projected points ---------- */
   int set_cache_idx;
@@ -368,11 +368,16 @@ void SonarOccMap::raycastProcess(const float range, const float field_of_view, c
     return;
   }
 
-  /* ---------- update occupancy in batch ---------- */
+  // this means that there exists potential window
   Eigen::Vector3i odom_idx, center_idx;
   posToIndex(t_wc, odom_idx);
-  Eigen::Vector3d center_pos = T_wc.block<3,3>(0,0) * Eigen::Vector3d(0, 0, 1) + T_wc.block<3,1>(0,3);  // the point right in front of sonar
+  Eigen::Vector3d center_pos = T_wc.block<3,3>(0,0) * Eigen::Vector3d(0, 0, range) + T_wc.block<3,1>(0,3);  // the point right in front of sonar
   posToIndex(center_pos, center_idx);
+
+  /* ---------- store the center of sonar reading, which will be queried by the occ_fusion ---------- */
+  sonar_center_idx_ = center_idx;
+
+  /* ---------- update occupancy in batch ---------- */
   while (!cache_voxel_.empty())
   {
     Eigen::Vector3i idx = cache_voxel_.front();
@@ -453,6 +458,24 @@ int SonarOccMap::setCacheOccupancy(const Eigen::Vector3d &pos, int occ)
 
   return idx_ctns;
 }
+
+// bool SonarOccMap::callDetectWindow(const Eigen::Vector3i &center_idx) 
+// {
+//   occ_fusion_msgs::DetectWindow srv;
+//   srv.request.x = center_idx(0);
+//   srv.request.y = center_idx(1);
+//   srv.request.z = center_idx(2);
+
+//   if (detect_window_client_.call(srv)) {
+//     ROS_INFO("Detect Window return");
+//     return true;
+//   }
+//   else {
+//     ROS_ERROR("Failed to call service add_two_ints");
+//     return false;
+//   }
+//   return true;
+// }
 
 double SonarOccMap::getMapDefault() {
   return clamp_min_log_ - unknown_flag_;
@@ -567,4 +590,6 @@ void SonarOccMap::init(const ros::NodeHandle& nh)
 
   hist_view_cloud_pub_ = node_.advertise<sensor_msgs::PointCloud2>("/sonar_occ_map/history_view_cloud", 1);
 	origin_pcl_pub_ = node_.advertise<sensor_msgs::PointCloud2>("/sonar_occ_map/raw_pcl", 1);
+
+  // detect_window_client_ = node_.serviceClient<occ_fusion_msgs::DetectWindow>("/occ_fusion/detect_window");
 }
