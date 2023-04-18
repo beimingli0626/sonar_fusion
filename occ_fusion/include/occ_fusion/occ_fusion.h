@@ -5,7 +5,13 @@
 #include "occ_grid/occ_map.h"
 #include "sonar_occ_grid/sonar_occ_map.h"
 #include <occ_fusion_msgs/DetectWindow.h>
-
+#include <pcl/ModelCoefficients.h>
+#include <pcl/io/pcd_io.h>
+#include <pcl/point_types.h>
+#include <pcl/sample_consensus/method_types.h>
+#include <pcl/sample_consensus/model_types.h>
+#include <pcl/segmentation/sac_segmentation.h>
+#include <pcl/filters/extract_indices.h>
 
 class OccFusion {
   public:
@@ -22,7 +28,20 @@ class OccFusion {
     ros::NodeHandle node_;
 
     void camOccMapUpdateCallback(const ros::TimerEvent& e);
+
+    // window detection
+    Eigen::Vector3d origin_, map_size_;
+    Eigen::Vector3i grid_size_;              // map size in index
+    double resolution_;
+    double x_search_range_, y_search_range_;
     void detectWindowCallback(const ros::TimerEvent& e);
+    void indexToPos(const Eigen::Vector3i &id, Eigen::Vector3d &pos);
+
+    /* plane segmentation pcl show */
+	  ros::Publisher plane_pcl_pub_;
+
+    pcl::SACSegmentation<pcl::PointXYZ> seg_;
+    pcl::ExtractIndices<pcl::PointXYZ> extract_;
 
     // ros::ServiceServer detect_window_server_;
     // bool detectWindow(occ_fusion_msgs::DetectWindow::Request &req, 

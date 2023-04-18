@@ -536,6 +536,9 @@ void SonarOccMap::init(const ros::NodeHandle& nh)
   // Init scene center
   scene_wc_ = Eigen::Matrix4d::Zero();
 
+  // init sonar center
+  sonar_center_idx_ = Eigen::Vector3i(-1, -1, -1);
+
   resolution_inv_ = 1 / resolution_;
   for (int i = 0; i < 3; ++i)
     grid_size_(i) = ceil(map_size_(i) / resolution_);

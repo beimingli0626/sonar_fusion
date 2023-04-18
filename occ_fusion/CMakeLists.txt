@@ -3,7 +3,8 @@ project(occ_fusion)
 
 ADD_COMPILE_OPTIONS(-std=c++14)
 set(CMAKE_CXX_FLAGS_RELEASE "-O3 -Wall -g")
-link_directories(/usr/local/lib/)
+link_directories(${PCL_LIBRARY_DIRS})
+add_definitions(${PCL_DEFINITIONS})
 ## equivalent to -L /usr/local/lib of gcc/g++
 ## Then libcnpy.so will be used as cnpy
 
@@ -52,7 +53,6 @@ include_directories(
 )
 # cnpy.h is inside /usr/local/include
 
-
 ## Declare a cpp library
 add_library(occ_fusion 
     src/occ_fusion.cpp 
@@ -74,7 +74,9 @@ add_dependencies(occ_fusion_node
 ## Specify libraries to link a library or executable target against
 target_link_libraries(occ_fusion_node 
     ${catkin_LIBRARIES}
+    ${PCL_LIBRARIES}
 )
 target_link_libraries(occ_fusion 
     ${catkin_LIBRARIES}
+    ${PCL_LIBRARIES}
 )
