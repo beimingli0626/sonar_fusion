@@ -12,6 +12,7 @@
 #include <pcl/sample_consensus/model_types.h>
 #include <pcl/segmentation/sac_segmentation.h>
 #include <pcl/filters/extract_indices.h>
+#include <visualization_msgs/Marker.h>
 
 class OccFusion {
   public:
@@ -32,13 +33,17 @@ class OccFusion {
     // window detection
     Eigen::Vector3d origin_, map_size_;
     Eigen::Vector3i grid_size_;              // map size in index
-    double resolution_;
+    double resolution_, resolution_inv_;
     double x_search_range_, y_search_range_;
     void detectWindowCallback(const ros::TimerEvent& e);
+    void detectOpen(float coeff_x, float coeff_y, float coeff_const, Eigen::Vector3i &sonar_center_idx);
     void indexToPos(const Eigen::Vector3i &id, Eigen::Vector3d &pos);
+    void posToIndex(const Eigen::Vector3d &pos, Eigen::Vector3i &id);
 
     /* plane segmentation pcl show */
-	  ros::Publisher plane_pcl_pub_;
+    bool vis_plane_pcl_;
+	  ros::Publisher plane_pcl_pub_, window_marker_pub_;
+    int window_marker_id_;
 
     pcl::SACSegmentation<pcl::PointXYZ> seg_;
     pcl::ExtractIndices<pcl::PointXYZ> extract_;

@@ -17,6 +17,7 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   std_msgs
   nav_msgs
+  visualization_msgs
   geometry_msgs
   cv_bridge
   occ_grid
@@ -32,6 +33,7 @@ catkin_package(
   roscpp 
   std_msgs 
   nav_msgs
+  visualization_msgs
   geometry_msgs
   cv_bridge
   occ_grid

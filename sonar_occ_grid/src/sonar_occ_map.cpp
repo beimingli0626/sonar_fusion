@@ -183,7 +183,7 @@ void SonarOccMap::sonarOdomCallback(const sensor_msgs::RangeConstPtr& sonar_msg,
                               const Eigen::Matrix4d& T_ic)
 {
   /* drop the first few sonar read until the camera has build an init map */
-  if (sonar_odom_count_++ < 5) return;  // delay the init of sonar occ map by roughly one second
+  if (sonar_odom_count_++ < 10) return;  // delay the init of sonar occ map by roughly one second
 
   /* ---------- get pose ---------- */
   // w, x, y, z -> q0, q1, q2, q3
@@ -360,7 +360,7 @@ void SonarOccMap::raycastProcess(const float range, const float field_of_view, c
 
   // if camera already detect the obstacles in the range, drop the sonar read and don't update the sonar occupancy grid
   ROS_INFO_STREAM("num occupied cells in camera occ map: " << num_occupied_in_cam);
-  if (num_occupied_in_cam > 4) {  // if more than 4 cells are detected as occupied in camera, drop this sonar reading
+  if (num_occupied_in_cam >= 4) {  // if at least 4 cells are detected as occupied in camera, drop this sonar reading
     fill(cache_all_.begin(), cache_all_.end(), 0);
     fill(cache_hit_.begin(), cache_hit_.end(), 0);
     queue<Eigen::Vector3i> empty;
