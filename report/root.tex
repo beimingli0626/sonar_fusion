@@ -1,0 +1,157 @@
+\documentclass[10pt, conference]{format/ieeeconf}
+
+\IEEEoverridecommandlockouts    % Needed for \thanks command
+\overrideIEEEmargins            % Needed to meet printer requirements.
+
+\usepackage{glossaries}
+\input{glossary}
+
+\bibliographystyle{format/IEEEtran}
+
+% Tables
+\usepackage{tabularx}
+\usepackage{multirow, multicol}
+\usepackage{array}
+\newcolumntype{P}[1]{>{\centering\arraybackslash}p{#1}}
+\newcolumntype{M}[1]{>{\centering\arraybackslash}m{#1}}
+\usepackage{booktabs}
+\newcolumntype{N}{>{\centering\arraybackslash}m{.5in}}
+\newcolumntype{G}{>{\centering\arraybackslash}m{2in}}
+
+% Comments
+\newcommand\todo[1]{\textcolor{red}{#1}}
+\newcommand\edited[1]{\textcolor{black}{#1}}
+\newcommand\canremove[1]{\textcolor{blue}{#1}}
+
+% XXX: Fix ieeeconf BS:
+\let\labelindent\relax
+\let\proof\relax
+\let\endproof\relax
+
+%====================================================================
+%%XXX: Packages
+%\usepackage[normalem]{ulem}	                        % underlining!
+\usepackage[table,usenames,dvipsnames]{xcolor}      % color
+\usepackage{extarrows}                              % http://ctan.org/pkg/extarrows
+\usepackage{enumitem}
+\usepackage{wrapfig}
+
+%\usepackage[margins]{trackchanges}
+
+% Math
+\usepackage{amsmath,amssymb,amsfonts,amsthm,dsfont, bm} % math
+\usepackage{mathtools}
+\usepackage{algorithm,algorithmicx,listings}        % algorithms
+\usepackage[noend]{algpseudocode}			              % necessary for algorithmicx
+\makeatletter
+\def\BState{\State\hskip-\ALG@thistlm}
+\makeatother
+\DeclarePairedDelimiter\abs{\lvert}{\rvert}%
+\DeclarePairedDelimiter\norm{\lVert}{\rVert}%
+% Swap the definition of \abs* and \norm*, so that \abs
+% and \norm resizes the size of the brackets, and the 
+% starred version does not.
+\makeatletter
+\let\oldabs\abs
+\def\abs{\@ifstar{\oldabs}{\oldabs*}}
+%
+\let\oldnorm\norm
+\def\norm{\@ifstar{\oldnorm}{\oldnorm*}}
+\makeatother
+
+% Figures
+\usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage{textcomp}
+\usepackage[font=footnotesize]{caption}
+\usepackage{subcaption}
+\usepackage[breaklinks=true, colorlinks, bookmarks=true, citecolor=Black, urlcolor=Violet,linkcolor=Black]{hyperref}
+
+%====================================================================
+%%XXX: Commands
+\def\liminf{\mathop{\lim\inf}\limits}	% EXAMPLE: \liminf_n A_n
+\def\limsup{\mathop{\lim\sup}\limits}	%
+\def\argmin{\mathop{\arg\min}\limits}	%
+\def\argmax{\mathop{\arg\max}\limits}	%
+% Write above and below equal sign
+\newcommand{\longeq}[2]{\xlongequal[\!#2\!]{\!#1\!}}
+% #1 = top; #2 = bottom; #3 = inequality (<,>,\leq,\geq)
+\newcommand{\longineq}[3]{\overset{#1}{\underset{#2}{#3}}}
+\newcommand{\indicator}{\mathds{1}}
+\DeclareMathOperator{\tr}{tr}
+\DeclareMathOperator{\per}{\mathbf{per}}
+\def\deg{^{\circ}}
+\def\negquad{\mkern-18mu}             % negative quad space
+\def\negqquad{\mkern-36mu}            % negative qquad space
+\newcommand{\txbx}[1]{\boxed{\text{#1}}}
+
+\setlength{\marginparwidth}{1.5cm}
+
+
+
+\usepackage[normalem]{ulem}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=cyan,
+}
+
+\newcommand{\prl}[1]{\mathopen{}\left(#1\right)\mathclose{}}
+\newcommand{\brl}[1]{\mathopen{}\left[#1\right]\mathclose{}}
+\newcommand{\crl}[1]{\mathopen{}\left\{#1\right\}\mathclose{}}
+% MATH HELPER FUNCTIONS
+\def\argmin{\mathop{\arg\min}\limits}	%
+\def\argmax{\mathop{\arg\max}\limits}	%
+\newcommand{\mat}[1]{\boldsymbol{\mathbf{#1}}}
+
+
+\DeclareMathAlphabet\mathbfcal{OMS}{cmsy}{b}{n}
+
+\usepackage[space, compress, sort]{cite}
+\newtheorem{theorem}{Theorem}
+\newtheorem{proposition}{Proposition}
+\newtheorem{corollary}{Corollary}
+\newtheorem{definition}{Definition}
+\newtheorem{assumption}{Assumption}
+\newtheorem*{assumption*}{Assumption}
+\newtheorem{remark}{Remark}
+\newtheorem*{problem*}{Problem}
+\newtheorem{problem}{Problem}
+\newtheorem{lemma}{Lemma}
+
+\usepackage{lipsum}
+\usepackage[capitalise]{cleveref}
+
+\begin{document}
+
+% \title{Behavior Guided Indoor MAV Exploration with Learned Information Prediction}
+\title{Sensor Fusion of Depth Camera and Ultrasonic Sensor for Glass Detection}
+% Capitalization of the title
+
+% Make room for more info lines in the \author command  
+\author{Beiming Li}
+% Paper headers 
+\maketitle
+
+\begin{abstract}
+We investigate the challenge posed by glass windows, which are common components in indoor environments, as they are not detectable by depth cameras. In contrast, ultrasonic sensors emit high-pitched sound pulses that are reflected regardless of lighting conditions or object's optical properties. Therefore, we investigate the feasibility of integrating ultrasonic sensors as a secondary sensing modality to our current mapping stack. The outcomes of this independent study include the development of simulation environments in Gazebo to replicate indoor building with windows, the implementation of a sensor fusion mechanism for combining depth image and sonar data, and the design of a RANSAC-based approach for window segmentation in indoor exploration scenarios. These outcomes enable the robot to recognize glass as obstacles and identify potential window regions based on geometric characteristics. This study provides insights into potential benefits and limitations of sensor fusion of depth camera and ultrasonic sensor.
+
+\end{abstract}
+    \input{tex/Introduction}
+    
+    \input{tex/RelatedWork}
+    
+    \input{tex/Method}
+    
+    \input{tex/Conclusions}
+
+    \input{tex/Discussion}
+% \newpage
+\bibliography{literature}
+
+\end{document}
+

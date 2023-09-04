@@ -1,0 +1,21 @@
+\section{Introduction}
+\label{sec:intro}
+
+Depth cameras have been popular in the field of robotics due to their ability to provide detailed environmental information that is useful for localization and mapping tasks, all while being cost-effective. However, these cameras are limited by two inherent drawbacks. Firstly, their sensing accuracy is significantly reduced when exposed to direct sunlight. Secondly, they are unable to detect transparent glass walls, which is also a limitation for LiDAR and Radar. On the other hand, ultrasonic sensors emit high-pitched sound pulses that are reflected regardless of lighting conditions or object's optical properties.
+
+Therefore, we propose investigating the feasibility of integrating ultrasonic sensors as a secondary sensing modality to our current mapping stack. The benefits of combining ultrasonic sensors are manifold. Firstly, they are lightweight and cost-effective, making them suitable for widespread deployment on \glspl{uav} without increasing payload significantly. Additionally, they provide safety guarantees in environments that may contain glass walls or direct sunlight exposure, which is especially important for \gls{uav} navigation.
+
+However, ultrasonic sensors suffer from low resolutions due to the multi-echo effect of sound waves, as well as lower sensing frequency compared to optical-based sensors. Furthermore, unlike depth cameras and radar arrays that provide image-like sensing feedback, ultrasonic sensors only provide one data point for each time-step, which is the measured distance to the nearest object in its field of view. Given the greater accuracy and detail provided by depth cameras, we use ToF cameras as the primary sensing device, while considering ultrasonic data as heuristic information. 
+
+In summary, outcomes of this independent study are:
+\begin{itemize}
+    \item Developed simulation environments in Gazebo to replicate indoor building with windows and added customized sonar model to the existing drone model.
+    \item Implemented sensor fusion mechanism for combining depth image and sonar data when maintaining an occupancy map, enabling the robot to recognize glass as obstacles. Used an inverse sensor model and sonar beam discretization during the occupancy probability update.
+    \item Designed a RANSAC-based approach for window segmentation in indoor exploration scenarios, which identifies potential window regions based on sonar readings, depth-camera-based occupancy map and geometric characteristics.
+\end{itemize}
+
+
+
+
+
+

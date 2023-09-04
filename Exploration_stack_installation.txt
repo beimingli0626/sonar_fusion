@@ -1,0 +1,74 @@
+Setup Ubuntu 20.04, 
+
+Install  ROS Noetic http://wiki.ros.org/noetic/Installation/Ubuntu
+
+Install dependencies
+sudo apt install git python3-catkin-tools python3-osrf-pycommon emacs vim tmux tmuxinator python-is-python3
+
+sudo apt install python3-matplotlib python3-numpy libeigen3-dev libgoogle-glog-dev libatlas-base-dev libsuitesparse-dev protobuf-compiler libnlopt-dev libnlopt-cxx-dev libyaml-cpp-dev
+
+sudo apt install ros-${ROS_DISTRO}-octomap-server ros-${ROS_DISTRO}-octomap-ros ros-${ROS_DISTRO}-sophus ros-${ROS_DISTRO}-swri-roscpp ros-${ROS_DISTRO}-pcl-ros ros-${ROS_DISTRO}-camera-calibration-parsers ros-${ROS_DISTRO}-tf2-geometry-msgs ros-${ROS_DISTRO}-random-numbers ros-${ROS_DISTRO}-image-geometry ros-${ROS_DISTRO}-image-transport-plugins ros-${ROS_DISTRO}-rviz ros-${ROS_DISTRO}-laser-assembler ros-${ROS_DISTRO}-image-proc ros-${ROS_DISTRO}-depth-image-proc
+sudo apt-get install ros-$ROS_DISTRO-grid-maps            
+sudo apt install ros-${ROS_DISTRO}-vision-msgs
+
+Install Gazebo 11 (Not needed if “ros-noetic-desktop-full” is installed)
+
+sudo sh -c 'echo "deb http://packages.osrfoundation.org/gazebo/ubuntu-stable `lsb_release -cs` main" > /etc/apt/sources.list.d/gazebo-stable.list'
+wget http://packages.osrfoundation.org/gazebo.key -O - | sudo apt-key add -
+
+sudo apt update
+sudo apt install gazebo11
+sudo apt install ros-${ROS_DISTRO}-gazebo11-ros ros-${ROS_DISTRO}-gazebo11-plugins
+
+
+Clone repositories 
+
+mkdir -p ~/ws_kr/src
+cd ~/ws_kr/src
+git clone https://github.com/KumarRobotics/kr_mav_control.git
+git clone https://github.com/KumarRobotics/mrsl_quadrotor.git
+git clone https://github.com/KumarRobotics/multi_mav_manager.git
+git clone https://github.com/KumarRobotics/waypoint_navigation_plugin.git
+git clone https://github.com/ReactorInspection/jps3d.git
+git clone https://github.com/tdinesh/qflight_descriptions.git
+ 
+git clone -b devel_noetic https://github.com/tdinesh/snav_replanning.git
+ 
+git clone -b devel_replan_noetic https://github.com/tdinesh/ewok.git
+git clone -b devel_cleanup https://github.com/tdinesh/snavquad_interface.git
+ 
+git clone -b devel https://github.com/tyuezhan/exploration_project.git
+ 
+git clone https://github.com/ATLFlight/snap_msgs.git
+ 
+Compile
+    cd ~/ws_kr/src/kr_mav_control
+    git submodule update --init --recursive
+    
+    cd ~/ws_kr/src/multi_mav_manager
+    git submodule update --init --recursive
+ 
+cd ~/ws_kr/src/ewok
+    git submodule update --init --recursive
+ 
+    #Ignore the following packages
+    cd ~/ws_kr/
+ 
+    cd ~/ws_kr/src/ewok/rotors_simulator/rotors_gazebo
+    touch CATKIN_IGNORE
+ 
+    catkin init
+    catkin config -DCMAKE_BUILD_TYPE=Release
+    catkin build -c
+ 
+Add workspace to bashrc
+ 
+    echo "source ~/ws_kr/devel/setup.bash" >> ~/.bashrc
+source ~/.bashrc
+ 
+Try running the sim
+    roscd ddk_sim_launch/scripts
+./demo_ddk.sh
+Wait for several seconds, motors on and take off using the GUI
+
+
