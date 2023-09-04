@@ -1,6 +1,0 @@
-<launch>
-
-<param name="use_sim_time" value="true" />
-<node name="RVIZ" pkg="rviz" type="rviz" args=" -d $(find sonar_vis)/param/ddk_sonar.rviz" />
-
-</launch>
