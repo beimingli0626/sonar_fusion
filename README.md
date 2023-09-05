@@ -6,7 +6,7 @@ We investigate the challenge posed by glass windows, which are common components
 We developed a collection of simulation environments in Gazebo, specifically designed to replicate the layouts of typical indoor building floor plans. An example of our simulation environments is presented under ```sonar_ddk/sample/world_with_glass.world```. Notice that the glass region has the collision volume but does not has a visual property. A sonar sensor urdf is shared under ```sonar_ddk/sample/sonar_sensor.urdf.xacro```.
 
 ## System Architecture
-To maintain an accurate and comprehensive representation of the surrounding environment, we maintained two separate occupancy maps. The first occupancy map is created solely using depth camera data, which provides reliable and precise information about the environment. The second occupancy map is updated with sonar readings, which can detect objects that are not visible to the camera. We also propose a RANSAC-based approach for window segmentation. The method initially identifies the region of interest based on the discrepancy between the sonar reading and the depth-image-based occupancy map. Then, the potential location of the window is further determined by its geometric characteristics.
+To maintain an accurate and comprehensive representation of the surrounding environment, we maintained two separate occupancy maps. The first occupancy map is created solely using depth camera data, which provides reliable and precise information about the environment. The second occupancy map is updated with sonar readings, which can detect objects that are not visible to the camera. We also propose a RANSAC-based approach for window segmentation. The method initially identifies the region of interest based on the discrepancy between the sonar reading and the depth-image-based occupancy map. Then, the potential location of the window is further determined by its geometric characteristics. Please refer to ```report/report.pdf``` for more details.
 
 <p align="center">
 <img src="./report/fig/occ_flow.png" height="120">  &nbsp; &nbsp;  <img src="./report/fig/ransac_flow.png" height="120">
@@ -23,7 +23,7 @@ Following figure shows an example of the segmented window area, which is marked 
 The limitations of the proposed approach include:
 - The sonar readings are only reliable when the drone is very close to the window and facing it directly, limiting its use in scenarios where the drone cannot get close or has obstructed views.
 - The RANSAC-based plane segmentation technique may struggle in real-life indoor settings with many obstacles, potentially leading to incorrect segmentation.
-- The approach assumes that windows are surrounded by solid, camera-visible walls, which may not always be the case, especially with thin frames or large tilted windows like those in the PERCH meeting room.
+- The approach assumes that windows are surrounded by solid, camera-visible walls, which may not always be the case, especially with thin frames or large tilted windows.
 
 ## Submodules
 - sonar_ddk: to be cloned onto the drone for reading sonar messages through UART and publish as rostopic for later use
